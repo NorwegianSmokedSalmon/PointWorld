@@ -29,6 +29,10 @@ def main():
     with open(test_txt, "w") as f:
         f.write(args.scene_path + "\n")
         
+    # Set PYTHONPATH so the 'real' module can be imported
+    env = os.environ.copy()
+    env["PYTHONPATH"] = repo_root + os.pathsep + env.get("PYTHONPATH", "")
+
     # 2. Run compute_depth.py
     print("\n[1/2] Running depth computation (compute_depth.py)...")
     cmd_depth = [
@@ -38,7 +42,7 @@ def main():
         "--allow_gcs_streaming"  # Streaming mode for test
     ]
     print(f"Command: {' '.join(cmd_depth)}")
-    subprocess.run(cmd_depth, cwd=repo_root, check=True)
+    subprocess.run(cmd_depth, cwd=repo_root, env=env, check=True)
     
     # 3. Run convert_droid_to_robotwin.py
     print("\n[2/2] Running RoboTwin converter (convert_droid_to_robotwin.py)...")
@@ -50,7 +54,7 @@ def main():
         "--allow_gcs_streaming"  # Streaming mode for test
     ]
     print(f"Command: {' '.join(cmd_convert)}")
-    subprocess.run(cmd_convert, cwd=repo_root, check=True)
+    subprocess.run(cmd_convert, cwd=repo_root, env=env, check=True)
     
     print("\n--- Test Completed Successfully! ---")
     print(f"The PointWorld intermediate files (depth H5) are in: {pw_out_dir}")
